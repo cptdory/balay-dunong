@@ -16,7 +16,6 @@ export default function Login() {
   const [otpId, setOtpId] = useState<string>("");
   const [otpCode, setOtpCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
   const [alert, setAlert] = useState<{
     message: string;
     variant: "default" | "destructive" | "success" | "info";
@@ -32,20 +31,24 @@ export default function Login() {
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
-    setError("");
+    setAlert(null);
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setAlert(null);
 
     try {
       // Check if user exists
       const response = await getUser({ email });
       
       if (response.status === "error") {
-        setError(response.message || "User not found");
+        setAlert({
+          title: "Error",
+          message: response.message || "User not found",
+          variant: "destructive",
+        });
         setLoading(false);
         return;
       }
@@ -62,9 +65,13 @@ export default function Login() {
 
       // Move to OTP verification step
       setStep("otp");
-      setError("");
+      setAlert(null);
     } catch (error) {
-      setError(error instanceof Error ? error.message : String(error));
+      setAlert({
+        title: "Error",
+        message: error instanceof Error ? error.message : String(error),
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -72,13 +79,13 @@ export default function Login() {
 
   const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOtpCode(e.target.value);
-    setError("");
+    setAlert(null);
   };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setAlert(null);
 
     try {
       // Verify OTP
@@ -92,7 +99,11 @@ export default function Login() {
         });
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Invalid OTP");
+      setAlert({
+        title: "Error",
+        message: error instanceof Error ? error.message : "Invalid OTP",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -100,18 +111,18 @@ export default function Login() {
 
     return (
         <>
-            <div className="min-h-screen text-white" style={{ background: 'linear-gradient(135deg, #0a0f1e 0%, #1a1f3a 100%)' }}>
+            <div className="min-h-screen bg-casa-gradient text-white">
                 <Header />
-                      {alert && (
-        <div className="fixed bottom-4 right-4 w-96 z-50">
-          <ErrorAlert
-            title={alert.title}
-            message={alert.message}
-            variant={alert.variant}
-            onClose={() => setAlert(null)}
-          />
-        </div>
-      )}
+                {alert && (
+                  <div className="fixed bottom-4 right-4 w-96 z-50">
+                    <ErrorAlert
+                      title={alert.title}
+                      message={alert.message}
+                      variant={alert.variant}
+                      onClose={() => setAlert(null)}
+                    />
+                  </div>
+                )}
                 {/* Starfield Background */}
                 <div
                     style={{
@@ -146,43 +157,17 @@ export default function Login() {
                     {/* Hero Section */}
                     <section className="max-w-7xl mx-auto pt-16 md:pt-32 pb-8 md:pb-20">
                         <div className="text-center mb-10 md:mb-16">
-                            <h1
-                                style={{
-                                    fontFamily: "'Cinzel', serif",
-                                    fontSize: 'clamp(2rem, 8vw, 3.5rem)',
-                                    fontWeight: 700,
-                                    letterSpacing: '0.02em',
-                                    marginBottom: '1rem',
-                                }}
-                                className="gold-text"
-                            >
+                            <h1 className="gold-text hero-title mb-6" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)' }}>
                                 Access Your Learning Journey
                             </h1>
-                            <p
-                                style={{
-                                    fontFamily: "'Lato', sans-serif",
-                                    fontSize: 'clamp(0.95rem, 3.8vw, 1.1rem)',
-                                    fontWeight: 300,
-                                    lineHeight: 1.8,
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    maxWidth: '600px',
-                                    margin: '0 auto',
-                                }}
-                            >
+                            <p className="text-subtitle max-w-xl mx-auto">
                                 Log in to continue your studies or manage your courses
                             </p>
                         </div>
 
                         {/* Login Card */}
                         <div className="max-w-lg mx-auto">
-                            <Card
-                                style={{
-                                    background: 'rgba(26, 31, 58, 0.7)',
-                                    backdropFilter: 'blur(12px)',
-                                    border: '1px solid rgba(201, 168, 76, 0.3)',
-                                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-                                }}
-                            >
+                            <Card className="card-glass border-0">
                                 <CardContent className="p-5 sm:p-8">
                                     {isEmailStage ? (
                                         <>
@@ -190,16 +175,7 @@ export default function Login() {
                                             <form onSubmit={handleEmailSubmit} className="space-y-6">
                                                 {/* Email Input */}
                                                 <div>
-                                                    <label
-                                                        htmlFor="email"
-                                                        style={{
-                                                            fontFamily: "'Lato', sans-serif",
-                                                            fontWeight: 600,
-                                                            fontSize: '0.9rem',
-                                                            letterSpacing: '0.01em',
-                                                        }}
-                                                        className="gold-text block mb-2"
-                                                    >
+                                                    <label htmlFor="email" className="label-gold">
                                                         Email Address
                                                     </label>
                                                     <input
@@ -208,52 +184,15 @@ export default function Login() {
                                                         value={email}
                                                         onChange={handleEmailChange}
                                                         placeholder="you@example.com"
-                                                        style={{
-                                                            background: 'rgba(15, 23, 42, 0.6)',
-                                                            border: '1px solid rgba(201, 168, 76, 0.2)',
-                                                            color: 'white',
-                                                            fontFamily: "'Lato', sans-serif",
-                                                            fontSize: '0.95rem',
-                                                        }}
-                                                        className="w-full px-4 py-3 rounded-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
-                                                        onFocus={(e) => {
-                                                            e.target.style.borderColor = 'rgba(201, 168, 76, 0.5)';
-                                                            e.target.style.background = 'rgba(15, 23, 42, 0.8)';
-                                                        }}
-                                                        onBlur={(e) => {
-                                                            e.target.style.borderColor = 'rgba(201, 168, 76, 0.2)';
-                                                            e.target.style.background = 'rgba(15, 23, 42, 0.6)';
-                                                        }}
+                                                        className="input-gold w-full"
                                                     />
                                                 </div>
-
-                                                {/* Error Message */}
-                                                {error && (
-                                                    <div
-                                                        style={{
-                                                            background: 'rgba(220, 38, 38, 0.1)',
-                                                            border: '1px solid rgba(220, 38, 38, 0.5)',
-                                                            color: '#fca5a5',
-                                                            fontFamily: "'Lato', sans-serif",
-                                                            fontSize: '0.9rem',
-                                                        }}
-                                                        className="px-4 py-3 rounded-sm"
-                                                    >
-                                                        {error}
-                                                    </div>
-                                                )}
 
                                                 {/* Submit Button */}
                                                 <Button
                                                     type="submit"
                                                     disabled={loading}
-                                                    className="btn-gold w-full px-6 py-3 rounded-none h-auto text-white font-semibold"
-                                                    style={{
-                                                        fontFamily: "'Cinzel', serif",
-                                                        fontSize: '1rem',
-                                                        letterSpacing: '0.05em',
-                                                        opacity: loading ? 0.7 : 1,
-                                                    }}
+                                                    className="btn-gold w-full rounded-none h-auto px-6 py-3 text-base"
                                                 >
                                                     {loading ? 'Logging In...' : 'Login'}
                                                 </Button>
@@ -264,30 +203,14 @@ export default function Login() {
                                             {/* OTP Stage */}
                                             <form onSubmit={handleOtpSubmit} className="space-y-6">
                                                 <div>
-                                                    <p
-                                                        style={{
-                                                            fontFamily: "'Lato', sans-serif",
-                                                            fontSize: '0.95rem',
-                                                            color: 'rgba(255, 255, 255, 0.7)',
-                                                            marginBottom: '1rem',
-                                                        }}
-                                                    >
+                                                    <p className="text-light mb-4">
                                                         An OTP has been sent to <span className="gold-text font-semibold">{email}</span>
                                                     </p>
                                                 </div>
 
-                                            {/* OTP Input */}
+                                                {/* OTP Input */}
                                                 <div>
-                                                    <label
-                                                        htmlFor="otp"
-                                                        style={{
-                                                            fontFamily: "'Lato', sans-serif",
-                                                            fontWeight: 600,
-                                                            fontSize: '0.9rem',
-                                                            letterSpacing: '0.01em',
-                                                        }}
-                                                        className="gold-text block mb-2"
-                                                    >
+                                                    <label htmlFor="otp" className="label-gold">
                                                         Enter OTP
                                                     </label>
                                                     <input
@@ -296,54 +219,15 @@ export default function Login() {
                                                         value={otpCode}
                                                         onChange={handleOtpChange}
                                                         placeholder="000000"
-                                                        style={{
-                                                            background: 'rgba(15, 23, 42, 0.6)',
-                                                            border: '1px solid rgba(201, 168, 76, 0.2)',
-                                                            color: 'white',
-                                                            fontFamily: "'Lato', sans-serif",
-                                                            fontSize: '0.95rem',
-                                                            textAlign: 'center',
-                                                            letterSpacing: '0.2em',
-                                                        }}
-                                                        className="w-full px-4 py-3 rounded-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
-                                                        onFocus={(e) => {
-                                                            e.target.style.borderColor = 'rgba(201, 168, 76, 0.5)';
-                                                            e.target.style.background = 'rgba(15, 23, 42, 0.8)';
-                                                        }}
-                                                        onBlur={(e) => {
-                                                            e.target.style.borderColor = 'rgba(201, 168, 76, 0.2)';
-                                                            e.target.style.background = 'rgba(15, 23, 42, 0.6)';
-                                                        }}
+                                                        className="input-gold w-full text-center tracking-widest"
                                                     />
                                                 </div>
-
-                                                {/* Error Message */}
-                                                {error && (
-                                                    <div
-                                                        style={{
-                                                            background: 'rgba(220, 38, 38, 0.1)',
-                                                            border: '1px solid rgba(220, 38, 38, 0.5)',
-                                                            color: '#fca5a5',
-                                                            fontFamily: "'Lato', sans-serif",
-                                                            fontSize: '0.9rem',
-                                                        }}
-                                                        className="px-4 py-3 rounded-sm"
-                                                    >
-                                                        {error}
-                                                    </div>
-                                                )}
 
                                                 {/* Verify Button */}
                                                 <Button
                                                     type="submit"
                                                     disabled={loading}
-                                                    className="btn-gold w-full px-6 py-3 rounded-none h-auto text-white font-semibold"
-                                                    style={{
-                                                        fontFamily: "'Cinzel', serif",
-                                                        fontSize: '1rem',
-                                                        letterSpacing: '0.05em',
-                                                        opacity: loading ? 0.7 : 1,
-                                                    }}
+                                                    className="btn-gold w-full rounded-none h-auto px-6 py-3 text-base"
                                                 >
                                                     {loading ? 'Verifying...' : 'Verify OTP'}
                                                 </Button>
@@ -354,23 +238,10 @@ export default function Login() {
 
 
                                     {/* Sign Up Link */}
-                                    <div className="mt-6 pt-6" style={{ borderTop: '1px solid rgba(201, 168, 76, 0.2)' }}>
-                                        <p
-                                            style={{
-                                                fontFamily: "'Lato', sans-serif",
-                                                fontSize: '0.95rem',
-                                                color: 'rgba(255, 255, 255, 0.7)',
-                                                textAlign: 'center',
-                                            }}
-                                        >
+                                    <div className="mt-6 pt-6 border-t border-gold-subtle">
+                                        <p className="text-light text-center">
                                             Don't have an account?{' '}
-                                            <a
-                                                href="#"
-                                                style={{
-                                                    fontFamily: "'Lato', sans-serif",
-                                                }}
-                                                className="gold-text font-semibold hover:opacity-80 transition-opacity"
-                                            >
+                                            <a href="#" className="gold-text font-semibold hover:opacity-80 transition-opacity">
                                                 Sign up here
                                             </a>
                                         </p>
@@ -380,13 +251,7 @@ export default function Login() {
 
                             {/* Back to Home */}
                             <div className="text-center mt-8">
-                                <p
-                                    style={{
-                                        fontFamily: "'Lato', sans-serif",
-                                        fontSize: '0.9rem',
-                                        color: 'rgba(255, 255, 255, 0.6)',
-                                    }}
-                                >
+                                <p className="text-muted">
                                     or{' '}
                                     <Link href="/" className="gold-text hover:opacity-80 transition-opacity font-semibold">
                                         return to home

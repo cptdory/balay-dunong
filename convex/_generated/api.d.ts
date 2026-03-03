@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as _courses from "../_courses.js";
 import type * as _otp from "../_otp.js";
 import type * as _users from "../_users.js";
 
@@ -18,6 +19,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  _courses: typeof _courses;
   _otp: typeof _otp;
   _users: typeof _users;
 }>;

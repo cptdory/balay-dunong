@@ -95,36 +95,17 @@ export default function TestimonialsPage() {
                     </div>
 
                     <div className="max-w-4xl mx-auto text-center">
-                        <div
-                            className="flex items-center justify-center gap-3 mb-8"
-                            style={{
-                                fontFamily: "'Lato', sans-serif",
-                                fontSize: '0.7rem',
-                                letterSpacing: '0.25em',
-                                textTransform: 'uppercase',
-                                color: '#c9a84c',
-                            }}
-                        >
-                            <div style={{ width: 32, height: 1, background: '#c9a84c' }} />
+                        <div className="subtitle mb-8 justify-center">
+                            <div className="gold-divider" />
                             Success Stories
-                            <div style={{ width: 32, height: 1, background: '#c9a84c' }} />
+                            <div className="gold-divider" />
                         </div>
 
                         <h1 className="hero-title gold-text mb-6" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)' }}>
                             Hear From Our Students
                         </h1>
 
-                        <p
-                            style={{
-                                fontFamily: "'Lato', sans-serif",
-                                fontWeight: 300,
-                                fontSize: '1.05rem',
-                                lineHeight: 1.8,
-                                color: '#94a3b8',
-                                maxWidth: 550,
-                                margin: '0 auto',
-                            }}
-                        >
+                        <p className="text-subtitle max-w-2xl mx-auto">
                             Real stories from real learners. Discover how Casa Del Sapere has inspired, challenged, and transformed our community.
                         </p>
                     </div>

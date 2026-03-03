@@ -112,38 +112,19 @@ export default function Page() {
 
                     <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center py-12 md:py-24">
                         <div className="text-center lg:text-left">
-                            <div
-                                className="flex items-center justify-center lg:justify-start gap-3 mb-8"
-                                style={{
-                                    fontFamily: "'Lato', sans-serif",
-                                    fontSize: '0.7rem',
-                                    letterSpacing: '0.25em',
-                                    textTransform: 'uppercase',
-                                    color: '#c9a84c',
-                                }}
-                            >
-                                <div style={{ width: 32, height: 1, background: '#c9a84c' }} />
+                            <div className="subtitle mb-8 lg:justify-start">
+                                <div className="gold-divider" />
                                 Established 2026 · Excellence in Education
-                                <div style={{ width: 32, height: 1, background: '#c9a84c' }} />
+                                <div className="gold-divider" />
                             </div>
 
                             <h1 className="hero-title gold-text mb-6" style={{ fontSize: 'clamp(3rem, 6vw, 5.5rem)' }}>
                                 Where Knowledge
                                 <br />
-                                <span style={{ color: '#e2e8f0', WebkitTextFillColor: '#e2e8f0' }}>Meets</span> Mastery
+                                <span className="text-slate-200">Meets</span> Mastery
                             </h1>
 
-                            <p
-                                style={{
-                                    fontFamily: "'Lato', sans-serif",
-                                    fontWeight: 300,
-                                    fontSize: '1.05rem',
-                                    lineHeight: 1.8,
-                                    color: '#94a3b8',
-                                    maxWidth: 480,
-                                }}
-                                className="mb-10 mx-auto lg:mx-0"
-                            >
+                            <p className="text-subtitle max-w-md mb-10 mx-auto lg:mx-0 lg:text-left">
                                 An elite tutorial center offering immersive learning in Robotics, Music, and Science.
                                 Cultivating curious minds through expert instruction and hands-on discovery.
                             </p>
