@@ -24,7 +24,7 @@ export const getUser = mutation({
   },
 });
 
-export const countStudents = query({
+export const getStudents = query({
   args: { role: v.string() },
   handler: async (ctx, args) => {
     const now = new Date();
@@ -48,19 +48,9 @@ export const countStudents = query({
     ).length;
 
     return {
+      students,
       totalStudents,
       studentsThisMonth,
     };
   },
 });
-
-
-// export const createUser = mutation({
-//   args: {email: v.string()},
-//   handler: async (convexToJson, args) => {
-//     const newUser = await convexToJson.db.insert("users",{
-//       email: args.email,
-//       createdAt: Date.now(),
-//     })
-//   }
-// })
