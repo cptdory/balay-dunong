@@ -113,3 +113,50 @@ export const deleteCourseMember = mutation({
     return true;
   },
 });
+
+export const updateCourse = mutation({
+  args: {
+    courseId: v.id("courses"),
+    courseCode: v.string(),
+    name: v.string(),
+    description: v.string(),
+    duration: v.string(),
+    status: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { courseId, ...updateData } = args;
+    await ctx.db.patch(courseId, updateData);
+    return courseId;
+  },
+});
+
+export const createCourse = mutation({
+  args: {
+    courseCode: v.string(),
+    name: v.string(),
+    description: v.string(),
+    duration: v.string(),
+    status: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const courseId = await ctx.db.insert("courses", args);
+    return courseId;
+  },
+});
+
+export const deleteCourse = mutation({
+  args: { courseId: v.id("courses") },
+  handler: async (ctx, args) => {
+    // Delete all course members first
+    const members = await ctx.db
+      .query("courseMembers")
+      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
+      .collect();
+
+    await Promise.all(members.map((member) => ctx.db.delete(member._id)));
+
+    // Then delete the course
+    await ctx.db.delete(args.courseId);
+    return true;
+  },
+});

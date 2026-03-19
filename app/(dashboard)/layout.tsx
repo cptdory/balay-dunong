@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { BarChart3, Users, BookOpen, Calendar, Briefcase, FileText, Settings, UserCheck } from "lucide-react";
+import { AlertProvider, useAlert } from "./alert-context";
+import { ErrorAlert } from "@/components/error-alert";
 
 type NavItem = {
   href: string;
@@ -50,7 +52,26 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function DashboardLayout({
+// Alert Container Component
+function AlertContainer() {
+  const { alert, clearAlert } = useAlert();
+
+  if (!alert) return null;
+
+  return (
+    <div className="fixed bottom-4 right-4 w-96 z-50">
+      <ErrorAlert
+        title={alert.title}
+        message={alert.message}
+        variant={alert.variant}
+        onClose={clearAlert}
+      />
+    </div>
+  );
+}
+
+// Dashboard Layout Component
+function DashboardLayoutContent({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
@@ -185,8 +206,21 @@ export default function DashboardLayout({
           <div className="footer-text footer-text-uppercase">(c) 2025 Casa Del Sapere</div>
           <div className="footer-text">Admin Portal v1.0</div>
         </footer>
+
+        <AlertContainer />
       </div>
     </div>
+  );
+}
+
+// Wrapper component with AlertProvider
+export default function DashboardLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <AlertProvider>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </AlertProvider>
   );
 }
 
