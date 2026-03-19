@@ -60,7 +60,7 @@ export default function Header() {
                             }}
                             className="gold-text"
                         >
-                            CASA DEL SAPERE
+                            Casa del Sapere
                         </div>
                         <div
                             style={{

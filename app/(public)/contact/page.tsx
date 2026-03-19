@@ -485,79 +485,29 @@ export default function ContactPage() {
                             </h2>
                         </div>
 
-                        <div
-                            style={{
-                                width: '100%',
-                                height: 400,
-                                background: 'linear-gradient(135deg, #132045 0%, #0a0f1e 100%)',
-                                border: '1px solid #c9a84c33',
-                                borderRadius: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                position: 'relative',
-                                overflow: 'hidden',
-                            }}
-                        >
-                            {/* Decorative elements */}
-                            <div
-                                className="geometric-accent"
-                                style={{
-                                    width: 300,
-                                    height: 300,
-                                    borderRadius: '50%',
-                                    right: -50,
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    borderColor: '#c9a84c18',
-                                }}
-                            />
-                            <div
-                                className="geometric-accent"
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                    borderRadius: '50%',
-                                    left: -50,
-                                    bottom: '10%',
-                                    borderColor: '#c9a84c14',
-                                }}
-                            />
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+                            {/* Street View */}
+                            <div style={{ borderRadius: 0, overflow: 'hidden', border: '1px solid #c9a84c33' }}>
+                                <iframe 
+                                    src="https://www.google.com/maps/embed?pb=!4v1773936551335!6m8!1m7!1sapL0-6JR1t2XSM0qsQnJEA!2m2!1d12.00113392922585!2d123.9954676588129!3f177.6352186067989!4f-13.447027076025748!5f0.7820865974627469" 
+                                    width="100%" 
+                                    height="450" 
+                                    style={{ border: 0, display: 'block' }} 
+                                    loading="lazy" 
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                />
+                            </div>
 
-                            <div style={{ textAlign: 'center', position: 'relative', zIndex: 10 }}>
-                                <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}>
-                                    <MapPin size={56} color="#c9a84c" strokeWidth={1.5} />
-                                </div>
-                                <h3
-                                    style={{
-                                        fontFamily: "'Cinzel', serif",
-                                        fontWeight: 600,
-                                        fontSize: '1.3rem',
-                                        color: '#e2e8f0',
-                                        marginBottom: 8,
-                                    }}
-                                >
-                                    D'Barn, Poblacion 
-                                </h3>
-                                <p
-                                    style={{
-                                        fontFamily: "'Lato', sans-serif",
-                                        fontSize: '1rem',
-                                        color: '#64748b',
-                                    }}
-                                >
-                                    Cataingan, Masbate
-                                </p>
-                                <p
-                                    style={{
-                                        fontFamily: "'Lato', sans-serif",
-                                        fontSize: '0.9rem',
-                                        color: '#475569',
-                                        marginTop: 12,
-                                    }}
-                                >
-                                    Open Monday - Saturday, 9:00 AM - 7:00 PM
-                                </p>
+                            {/* Map */}
+                            <div style={{ borderRadius: 0, overflow: 'hidden', border: '1px solid #c9a84c33' }}>
+                                <iframe 
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3709.5166665391694!2d123.99256557482435!3d12.001134288232103!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33a70f4ae6336059%3A0x3a6e2680bfbcef4b!2sD&#39;Barn%20Shelter%20and%20Music%20House!5e1!3m2!1sen!2sus!4v1773936741668!5m2!1sen!2sus" 
+                                    width="100%" 
+                                    height="450" 
+                                    style={{ border: 0, display: 'block' }} 
+                                    loading="lazy" 
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                />
                             </div>
                         </div>
                     </div>
