@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 export const getUserCourses = query({
@@ -17,7 +17,7 @@ export const getUserCourses = query({
         return {
           ...course,
           role: membership.role,   // "student" | "instructor"
-          joinedAt: membership.joinedAt,
+          _creationTime: membership._creationTime,
         };
       })
     );
@@ -39,4 +39,77 @@ export const countCourses = query ({
       activeCourses,
     };
   },
-})
+});
+
+export const getAllCourses = query({
+  args: {},
+  handler: async (ctx) => {
+    const courses = await ctx.db.query("courses").collect();
+    return courses;
+  },
+});
+
+export const getCourseMembersByRole = query({
+  args: { courseId: v.id("courses"), role: v.string() },
+  handler: async (ctx, args) => {
+    const members = await ctx.db
+      .query("courseMembers")
+      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
+      .filter((q) => q.eq(q.field("role"), args.role))
+      .collect();
+
+    // Fetch user details for each member
+    const membersWithDetails = await Promise.all(
+      members.map(async (member) => {
+        const user = await ctx.db.get(member.userId);
+        return {
+          ...member,
+          user: user,
+        };
+      })
+    );
+
+    return membersWithDetails;
+  },
+});
+
+export const getAllUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    return users;
+  },
+});
+
+export const addCourseMember = mutation({
+  args: { courseId: v.id("courses"), userId: v.id("users"), role: v.string() },
+  handler: async (ctx, args) => {
+    // Check if member already exists
+    const existing = await ctx.db
+      .query("courseMembers")
+      .withIndex("by_course_and_user", (q) => 
+        q.eq("courseId", args.courseId).eq("userId", args.userId)
+      )
+      .first();
+
+    if (existing) {
+      throw new Error("User is already a member of this course");
+    }
+
+    const memberId = await ctx.db.insert("courseMembers", {
+      courseId: args.courseId,
+      userId: args.userId,
+      role: args.role,
+    });
+
+    return memberId;
+  },
+});
+
+export const deleteCourseMember = mutation({
+  args: { memberId: v.id("courseMembers") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.memberId);
+    return true;
+  },
+});

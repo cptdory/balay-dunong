@@ -54,3 +54,21 @@ export const getStudents = query({
     };
   },
 });
+
+export const updateStudent = mutation({
+  args: {
+    id: v.id("users"),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    birthday: v.optional(v.string()),
+    address: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    avatar: v.optional(v.string()),
+    status: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    await ctx.db.patch(id, updates);
+    return { success: true };
+  },
+});

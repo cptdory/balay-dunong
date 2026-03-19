@@ -5,8 +5,13 @@ export default defineSchema({
   users: defineTable({
     email: v.string(),
     name: v.string(),
+    birthday: v.string(),
+    address: v.string(),
+    phone: v.string(),
+    avatar: v.string(), //base64 encoded image
     createdAt: v.number(),
     role: v.string(), // developer, admin, instructor, student
+    status: v.string(), // active, inactive, pending
   }).index("by_email", ["email"]),
 
   otps: defineTable({
@@ -32,7 +37,6 @@ export default defineSchema({
     courseId: v.id("courses"),
     userId: v.id("users"),
     role: v.string(),       // "instructor" | "student"
-    joinedAt: v.number(),
   })
     .index("by_course", ["courseId"])
     .index("by_user", ["userId"])
