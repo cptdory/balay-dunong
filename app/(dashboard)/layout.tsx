@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import { BarChart3, Users, BookOpen, Calendar, Briefcase, FileText, Settings, UserCheck } from "lucide-react";
+import { BarChart3, Users, BookOpen, Calendar, Briefcase, FileText, Settings, UserCheck, BellIcon} from "lucide-react";
 import { AlertProvider, useAlert } from "./alert-context";
 import { ErrorAlert } from "@/components/error-alert";
 
@@ -41,7 +41,7 @@ const NAV_GROUPS: NavGroup[] = [
     group: "Management",
     items: [
       { href: "/schedule", icon: Calendar, label: "Schedule" },
-      { href: "/faculty", icon: Briefcase, label: "Faculty" },
+      { href: "/instructors", icon: Briefcase, label: "Instructors" },
       { href: "/reports", icon: FileText, label: "Reports" },
       { href: "/settings", icon: Settings, label: "Settings" },
     ],
@@ -183,10 +183,9 @@ function DashboardLayoutContent({
           </div>
           <div className="header-actions">
             <div className="notification-icon">
-              <span>N</span>
+              <span><BellIcon /></span>
               <div className="notification-dot" />
             </div>
-            <button className="topbar-btn">+ New Enrollment</button>
             <div className="sidebar-avatar" style={{ cursor: "pointer" }}>
               AD
             </div>

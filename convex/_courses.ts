@@ -122,6 +122,10 @@ export const updateCourse = mutation({
     description: v.string(),
     duration: v.string(),
     status: v.string(),
+    category: v.string(),
+    level: v.string(),
+    price: v.number(),
+    thumbnail: v.string(),
   },
   handler: async (ctx, args) => {
     const { courseId, ...updateData } = args;
@@ -137,6 +141,10 @@ export const createCourse = mutation({
     description: v.string(),
     duration: v.string(),
     status: v.string(),
+    category: v.string(),
+    level: v.string(),
+    price: v.number(),
+    thumbnail: v.string(),
   },
   handler: async (ctx, args) => {
     const courseId = await ctx.db.insert("courses", args);

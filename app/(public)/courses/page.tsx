@@ -4,72 +4,53 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Zap, Music, Beaker } from 'lucide-react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
-const allCourses = [
-    {
-        id: 1,
-        icon: Zap,
-        category: 'Technology',
-        title: 'Robotics Engineering',
-        description:
-            'Dive into the world of robotics — from circuit design to programming autonomous machines. Hands-on projects every session.',
-        fullDescription:
-            'Master the fundamentals of robotics engineering with our comprehensive program. Learn circuit design, programming, mechanical engineering, and artificial intelligence. Build real autonomous machines and compete in regional competitions.',
-        instructor: 'Juan Dela Cruz',
-        sessions: '7 Sessions',
-        duration: '7 Weeks',
-        level: 'All Levels',
-        schedule: 'Sat 12:00 PM - 1:00 PM',
-        price: '₱0.00',
-        maxStudents: 20,
-    },
-    {
-        id: 2,
-        icon: Music,
-        category: 'Music & Arts',
-        title: 'Guitar Masterclass',
-        description:
-            'Learn from classical fundamentals to modern techniques. Acoustic or electric — master chords, melody, and your own musical voice.',
-        fullDescription:
-            'Explore the full spectrum of guitar playing. From classical fingerstyle to modern rock techniques, develop your unique musical voice. Our instructors will guide you through music theory, chord progressions, and improvisation.',
-        instructor: 'Juan Dela Cruz',
-        sessions: '7 Sessions',
-        duration: '7 Weeks',
-        level: 'All Levels',
-        schedule: 'Sat 12:00 PM - 1:00 PM',
-        price: '₱0.00',
-        maxStudents: 20,
-    },
-    {
-        id: 3,
-        icon: Beaker,
-        category: 'Science',
-        title: 'Science Investigatory Projects',
-        description:
-            'Design, conduct, and present your own scientific experiments. Build critical thinking skills and compete at regional science fairs.',
-        fullDescription:
-            'Learn the scientific method through hands-on experimentation. Design projects, collect data, analyze results, and present findings. Prepare for science fairs and competitions while developing critical thinking and research skills.',
-        instructor: 'Juan Dela Cruz',
-        sessions: '7 Sessions',
-        duration: '7 Weeks',
-        level: 'All Levels',
-        schedule: 'Sat 12:00 PM - 1:00 PM',
-        price: '₱0.00',
-        maxStudents: 20,
-    },
-];
+const categoryIcons: Record<string, any> = {
+  'Technology': Zap,
+  'Music & Arts': Music,
+  'Science': Beaker,
+  'Programming': Zap,
+  'Arts': Music,
+};
 
 export default function CoursesPage() {
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [expandedCourse, setExpandedCourse] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
+  
+  // Fetch courses from database
+  const coursesData = useQuery(api._courses.getAllCourses);
+  
+  const courses = useMemo(() => {
+    return (coursesData || []).map((course: any) => ({
+      id: course._id,
+      icon: categoryIcons[course.category] || Zap,
+      category: course.category,
+      title: course.name,
+      description: course.description,
+      fullDescription: course.description, // Use description as fallback
+      instructor: 'TBA',
+      sessions: `${Math.ceil(parseInt(course.duration) / 7)} Sessions` || '7 Sessions',
+      duration: course.duration,
+      level: course.level,
+      schedule: 'Schedule TBA',
+      price: `₱${course.price.toFixed(2)}`,
+      maxStudents: 20,
+      thumbnail: course.thumbnail,
+    }));
+  }, [coursesData]);
 
-    const categories = ['Technology', 'Music & Arts', 'Science'];
+  const categories = useMemo(() => {
+    const cats = new Set(courses.map(c => c.category));
+    return Array.from(cats);
+  }, [courses]);
 
     const filteredCourses = selectedCategory
-        ? allCourses.filter(course => course.category === selectedCategory)
-        : allCourses;
+        ? courses.filter(course => course.category === selectedCategory)
+        : courses;
 
     return (
         <>

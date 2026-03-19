@@ -28,6 +28,10 @@ export default defineSchema({
     description: v.string(),
     duration: v.string(),
     status: v.string(), // "active" | "inactive"
+    category: v.string(),
+    level: v.string(), // "beginner" | "intermediate" | "advanced"
+    thumbnail: v.string(), // base64 encoded image
+    price: v.number(),
   })
     .index("by_courseCode", ["courseCode"])
     .index("by_status", ["status"]),
@@ -45,7 +49,7 @@ export default defineSchema({
     courseId: v.id("courses"),
     title: v.string(), // e.g. "Lesson 1: Introduction"
     description: v.optional(v.string()),
-    order: v.number(), // for ترتيب / sorting
+    order: v.number(), // for sorting
   })
     .index("by_course", ["courseId"])
     .index("by_course_and_order", ["courseId", "order"]),

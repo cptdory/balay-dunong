@@ -3,47 +3,42 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Zap, Music, Beaker } from 'lucide-react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
-const courses = [
-    {
-        id: 1,
-        icon: Zap,
-        category: 'Technology',
-        title: 'Robotics Engineering',
-        sessions: '7 Sessions',
-        level: 'All Levels',
-        price: '₱0.00',
-    },
-    {
-        id: 2,
-        icon: Music,
-        category: 'Music & Arts',
-        title: 'Guitar Masterclass',
-        sessions: '7 Sessions',
-        level: 'All Levels',
-        price: '₱0.00',
-    },
-    {
-        id: 3,
-        icon: Beaker,
-        category: 'Science',
-        title: 'Science Investigatory Projects',
-        sessions: '7 Sessions',
-        level: 'All Levels',
-        price: '₱0.00',
-    },
-];
+const categoryIcons: Record<string, any> = {
+  'Technology': Zap,
+  'Music & Arts': Music,
+  'Science': Beaker,
+  'Programming': Zap,
+  'Arts': Music,
+};
 
 export default function EnrollPage() {
-    const [selectedCourse, setSelectedCourse] = useState<number | null>(null);
+    const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
         phone: '',
     });
+
+    // Fetch courses from database
+    const coursesData = useQuery(api._courses.getAllCourses);
+    
+    const courses = useMemo(() => {
+        return (coursesData || []).map((course: any) => ({
+          id: course._id,
+          icon: categoryIcons[course.category] || Zap,
+          category: course.category,
+          title: course.name,
+          sessions: `${Math.ceil(parseInt(course.duration) / 7)} Sessions` || '7 Sessions',
+          level: course.level,
+          price: `₱${course.price.toFixed(2)}`,
+        }));
+    }, [coursesData]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -109,7 +104,7 @@ export default function EnrollPage() {
                 <section className="px-8 py-24">
                     <div className="max-w-5xl mx-auto">
                         <div className="grid lg:grid-cols-3 gap-8 mb-20">
-                            {courses.map((course) => (
+                            {(courses || []).map((course) => (
                                 <div
                                     key={course.id}
                                     onClick={() => setSelectedCourse(course.id)}

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Casa del Sapere",
+  title: "Casa del Sapere", 
   description: "Where Knowledge Meets Mastery",
 };
 

@@ -14,13 +14,13 @@ import { useAlert } from "../alert-context";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type StudentStatus = "active" | "inactive" | "pending";
+type InstructorStatus = "active" | "inactive" | "pending";
 
-type Student = {
+type Instructor = {
   id: string;
   name: string;
   email: string;
-  status: StudentStatus;
+  status: InstructorStatus;
   enrollmentDate: string;
   birthday?: string;
   address?: string;
@@ -62,19 +62,19 @@ function getInitials(name: string) {
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
-const statusStyles: Record<StudentStatus, string> = {
+const statusStyles: Record<InstructorStatus, string> = {
   active:   "bg-green-400/[0.07] border-green-400/25 text-green-400",
   inactive: "bg-red-400/[0.07] border-red-400/25 text-red-400",
   pending:  "bg-[#c9a84c]/[0.07] border-[#c9a84c]/25 text-[#c9a84c]",
 };
 
-const dotStyles: Record<StudentStatus, string> = {
+const dotStyles: Record<InstructorStatus, string> = {
   active:   "bg-green-400",
   inactive: "bg-red-400",
   pending:  "bg-[#c9a84c]",
 };
 
-function StatusBadge({ status }: { status: StudentStatus }) {
+function StatusBadge({ status }: { status: InstructorStatus }) {
   return (
     <span className={`inline-flex items-center gap-1.5 text-[0.55rem] tracking-[0.15em] uppercase px-2.5 py-1 border font-bold font-[Lato] ${statusStyles[status]}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${dotStyles[status]}`} />
@@ -127,36 +127,36 @@ function Avatar({ avatar, name, editable = false, onAvatarChange }: {
   );
 }
 
-// ─── Student Dialog ───────────────────────────────────────────────────────────
+// ─── Instructor Dialog ───────────────────────────────────────────────────────────
 
-function StudentDialog({ student, onClose }: { student: Student; onClose: () => void }) {
-  const updateStudentMutation = useMutation(api._users.updateUsers);
+function InstructorDialog({ Instructor, onClose }: { Instructor: Instructor; onClose: () => void }) {
+  const updateInstructorMutation = useMutation(api._users.updateUsers);
   const { showAlert } = useAlert();
   const [isEditing, setIsEditing] = useState(false);
-  const [form, setForm] = useState<Student>(student);
+  const [form, setForm] = useState<Instructor>(Instructor);
   const [isSaving, setIsSaving] = useState(false);
 
-  const patch = (field: keyof Student, value: string) =>
+  const patch = (field: keyof Instructor, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await updateStudentMutation({
+      await updateInstructorMutation({
         id: form.id as any, name: form.name, email: form.email,
         birthday: form.birthday, address: form.address,
         phone: form.phone, avatar: form.avatar, status: form.status,
       });
-      showAlert({ message: "Student profile updated successfully", variant: "success", title: "Success" });
+      showAlert({ message: "Instructor profile updated successfully", variant: "success", title: "Success" });
       setIsEditing(false);
     } catch {
-      showAlert({ message: "Error updating student profile", variant: "destructive", title: "Error" });
+      showAlert({ message: "Error updating Instructor profile", variant: "destructive", title: "Error" });
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleCancel = () => { setForm(student); setIsEditing(false); };
+  const handleCancel = () => { setForm(Instructor); setIsEditing(false); };
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -164,12 +164,12 @@ function StudentDialog({ student, onClose }: { student: Student; onClose: () => 
 
         {/* Banner */}
         <div className="bg-gradient-to-br from-[#0d1535] to-[#0a1628] border-b border-[#c9a84c]/[0.13] px-6 pt-5 pb-5">
-          <DialogTitle className="sr-only">Student Profile</DialogTitle>
+          <DialogTitle className="sr-only">Instructor Profile</DialogTitle>
           <div className="h-px bg-gradient-to-r from-transparent via-[#c9a84c]/40 to-transparent mb-5" />
           <div className="flex items-center gap-4">
             <Avatar avatar={form.avatar} name={form.name} editable={isEditing} onAvatarChange={(v) => patch("avatar", v)} />
             <div className="flex-1 min-w-0">
-              <p className="page-label mb-1">Student Profile</p>
+              <p className="page-label mb-1">Instructor Profile</p>
               <h2 className="font-[Cinzel] font-bold text-lg text-gray-100 mb-2 truncate">{form.name}</h2>
               <StatusBadge status={form.status} />
             </div>
@@ -267,8 +267,8 @@ function StudentDialog({ student, onClose }: { student: Student; onClose: () => 
               </ProfileField>
             </div>
 
-            {/* Student ID — always read-only */}
-            <ProfileField label="Student ID">
+            {/* Instructor ID — always read-only */}
+            <ProfileField label="Instructor ID">
               <FieldValue value={form.id} />
             </ProfileField>
 
@@ -279,32 +279,32 @@ function StudentDialog({ student, onClose }: { student: Student; onClose: () => 
   );
 }
 
-// ─── Students Page ────────────────────────────────────────────────────────────
+// ─── Instructors Page ────────────────────────────────────────────────────────────
 
-export default function StudentsPage() {
-  const studentStats = useQuery(api._users.getUsers, { role: "student" });
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+export default function InstructorsPage() {
+  const InstructorStats = useQuery(api._users.getUsers, { role: "instructor" });
+  const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(null);
   const [search, setSearch] = useState("");
 
-  const studentsData = useMemo<Student[]>(
+  const InstructorsData = useMemo<Instructor[]>(
     () =>
-      studentStats?.users?.map((s) => ({
+      InstructorStats?.users?.map((s) => ({
         id: s._id, name: s.name, email: s.email,
-        status: (s.status as StudentStatus) ?? "pending",
+        status: (s.status as InstructorStatus) ?? "pending",
         enrollmentDate: new Date(s._creationTime).toISOString().split("T")[0],
         birthday: s.birthday, address: s.address, phone: s.phone, avatar: s.avatar,
       })) ?? [],
-    [studentStats]
+    [InstructorStats]
   );
 
   const filtered = useMemo(() =>
-    studentsData.filter((s) =>
+    InstructorsData.filter((s) =>
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       s.email.toLowerCase().includes(search.toLowerCase())
-    ), [studentsData, search]
+    ), [InstructorsData, search]
   );
 
-  const columns = useMemo<ColumnDef<Student>[]>(() => [
+  const columns = useMemo<ColumnDef<Instructor>[]>(() => [
     {
       accessorKey: "name", header: "Name",
       cell: ({ row }) => (
@@ -329,7 +329,7 @@ export default function StudentsPage() {
     {
       id: "actions", header: "",
       cell: ({ row }) => (
-        <button onClick={() => setSelectedStudent(row.original)}
+        <button onClick={() => setSelectedInstructor(row.original)}
           className="border border-[#c9a84c]/20 text-[#c9a84c]/60 hover:border-[#c9a84c] hover:text-[#c9a84c] text-[0.6rem] tracking-widest uppercase font-[Lato] px-3 py-1 transition-colors">
           View →
         </button>
@@ -346,9 +346,9 @@ export default function StudentsPage() {
         {/* Toolbar */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <p className="page-label mb-0.5">Students Management</p>
+            <p className="page-label mb-0.5">Instructors Management</p>
             <p className="font-[Lato] text-sm text-gray-400">
-              {studentsData.length} student{studentsData.length !== 1 ? "s" : ""} registered
+              {InstructorsData.length} Instructor{InstructorsData.length !== 1 ? "s" : ""} registered
             </p>
           </div>
           <div className="relative">
@@ -356,7 +356,7 @@ export default function StudentsPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search students…"
+              placeholder="Search Instructors…"
               className="pl-8 pr-4 py-2 bg-[#0a0f1e] border border-[#c9a84c]/[0.13] text-gray-200 text-sm font-[Lato] focus:outline-none focus:border-[#c9a84c]/50 placeholder:text-[#334155] w-56"
             />
           </div>
@@ -393,7 +393,7 @@ export default function StudentsPage() {
                     <div className="flex flex-col items-center gap-3 text-[#475569]">
                       <GraduationCap size={32} className="opacity-30" />
                       <p className="font-[Lato] text-sm">
-                        {search ? "No students match your search." : "No students registered yet."}
+                        {search ? "No Instructors match your search." : "No Instructors registered yet."}
                       </p>
                     </div>
                   </TableCell>
@@ -404,8 +404,8 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      {selectedStudent && (
-        <StudentDialog student={selectedStudent} onClose={() => setSelectedStudent(null)} />
+      {selectedInstructor && (
+        <InstructorDialog Instructor={selectedInstructor} onClose={() => setSelectedInstructor(null)} />
       )}
     </>
   );

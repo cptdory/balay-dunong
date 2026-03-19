@@ -24,7 +24,7 @@ export const getUser = mutation({
   },
 });
 
-export const getStudents = query({
+export const getUsers = query({
   args: { role: v.string() },
   handler: async (ctx, args) => {
     const now = new Date();
@@ -36,26 +36,26 @@ export const getStudents = query({
       1
     ).getTime();
 
-    const students = await ctx.db
+    const users = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("role"), args.role))
       .collect();
 
-    const totalStudents = students.length;
+    const totalStudents = users.length;
 
-    const studentsThisMonth = students.filter(
-      (student) => student._creationTime >= startOfMonth
+    const studentsThisMonth = users.filter(
+      (user) => user._creationTime >= startOfMonth
     ).length;
 
     return {
-      students,
+      users,
       totalStudents,
       studentsThisMonth,
     };
   },
 });
 
-export const updateStudent = mutation({
+export const updateUsers = mutation({
   args: {
     id: v.id("users"),
     name: v.optional(v.string()),

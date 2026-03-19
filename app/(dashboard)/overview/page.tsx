@@ -11,8 +11,8 @@ type StatItem = {
 };
 
 export default function OverviewPage() {
-  const studentStats = useQuery(api._users.getStudents, { role: "Student" });
-  const coursesStats = useQuery(api._courses.countCourses, { status: "Active" });
+  const studentStats = useQuery(api._users.getUsers, { role: "student" });
+  const coursesStats = useQuery(api._courses.countCourses, { status: "active" });
 
   const stats: StatItem[] = [
     {

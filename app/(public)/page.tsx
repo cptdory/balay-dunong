@@ -1,51 +1,22 @@
+"use client";
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Zap, Music, Beaker } from 'lucide-react';
+import { useMemo } from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
-const courses = [
-    {
-        id: 1,
-        icon: Zap,
-        category: 'Technology',
-        title: 'Robotics Engineering',
-        description:
-            'Dive into the world of robotics — from circuit design to programming autonomous machines. Hands-on projects every session.',
-        sessions: '7 Sessions',
-        level: 'All Levels',
-        accent: 'from-amber-400/20 to-yellow-600/10',
-        border: 'border-amber-500/30',
-        glow: 'shadow-amber-500/20',
-    },
-    {
-        id: 2,
-        icon: Music,
-        category: 'Music & Arts',
-        title: 'Guitar Masterclass',
-        description:
-            'Learn from classical fundamentals to modern techniques. Acoustic or electric — master chords, melody, and your own musical voice.',
-        sessions: '7 Sessions',
-        level: 'All Levels',
-        accent: 'from-blue-400/20 to-indigo-600/10',
-        border: 'border-blue-400/30',
-        glow: 'shadow-blue-400/20',
-    },
-    {
-        id: 3,
-        icon: Beaker,
-        category: 'Science',
-        title: 'Science Investigatory Projects',
-        description:
-            'Design, conduct, and present your own scientific experiments. Build critical thinking skills and compete at regional science fairs.',
-        sessions: '7 Sessions',
-        level: 'All Levels',
-        accent: 'from-emerald-400/20 to-teal-600/10',
-        border: 'border-emerald-400/30',
-        glow: 'shadow-emerald-400/20',
-    },
-];
+const categoryIcons: Record<string, any> = {
+  'Technology': Zap,
+  'Music & Arts': Music,
+  'Science': Beaker,
+  'Programming': Zap,
+  'Arts': Music,
+};
 
 const stats = [
     { value: 'xxx+', label: 'Students Enrolled' },
@@ -54,6 +25,20 @@ const stats = [
 ];
 
 export default function Page() {
+    // Fetch courses from database
+    const coursesData = useQuery(api._courses.getAllCourses);
+    
+    const courses = useMemo(() => {
+        return (coursesData || []).slice(0, 3).map((course: any) => ({
+          id: course._id,
+          icon: categoryIcons[course.category] || Zap,
+          category: course.category,
+          title: course.name,
+          description: course.description,
+          sessions: `${Math.ceil(parseInt(course.duration) / 7)} Sessions` || '7 Sessions',
+          level: course.level,
+        }));
+    }, [coursesData]);
     return (
         <>
             <div className="min-h-screen bg-casa-gradient"
@@ -302,7 +287,7 @@ export default function Page() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-8">
-                            {courses.map((course) => (
+                            {(courses || []).map((course) => (
                                 <div key={course.id} className="card-hover">
                                     <Card
                                         style={{

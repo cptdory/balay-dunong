@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import {
   BookOpen, Users, Eye, Clock, UserCircle2,
-  Plus, Trash2, Edit2, ChevronRight, GraduationCap,
+  Plus, Trash2, Edit2, ChevronRight, GraduationCap, Camera,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -21,6 +21,10 @@ type Course = {
   description: string;
   duration: string;
   status: string;
+  category: string;
+  level: string;
+  price: number;
+  thumbnail: string;
 };
 
 type CourseMember = {
@@ -88,6 +92,43 @@ function FormField({ label, children }: { label: string; children: React.ReactNo
   );
 }
 
+// ─── Thumbnail Component ──────────────────────────────────────────────────────
+
+function ThumbnailUpload({ thumbnail, name, editable = false, onThumbnailChange }: {
+  thumbnail?: string; name: string; editable?: boolean; onThumbnailChange?: (v: string) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onThumbnailChange) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => onThumbnailChange(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+  return (
+    <div className="relative w-full h-40">
+      <div className="w-full h-full rounded border-2 border-[#c9a84c]/30 bg-gradient-to-br from-[#0d1535] to-[#132045] flex items-center justify-center overflow-hidden">
+        {thumbnail
+          ? <img src={thumbnail} alt={name} className="w-full h-full object-cover" />
+          : <div className="flex flex-col items-center gap-2 text-[#c9a84c]/50">
+              <BookOpen size={24} />
+              <span className="font-[Lato] text-xs">No image yet</span>
+            </div>
+        }
+      </div>
+      {editable && (
+        <>
+          <button type="button" onClick={() => fileInputRef.current?.click()}
+            className="absolute bottom-3 right-3 w-[36px] h-[36px] rounded-full bg-[#c9a84c] border-2 border-[#080e20] flex items-center justify-center hover:bg-[#e8d49a] transition-colors">
+            <Camera size={14} color="#0a0f1e" />
+          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+        </>
+      )}
+    </div>
+  );
+}
+
 function DialogActions({ onClose, onConfirm, confirmLabel, isLoading, danger }: {
   onClose: () => void;
   onConfirm: () => void;
@@ -123,19 +164,28 @@ function CourseFormDialog({ open, onClose, course, onSave }: {
   const [form, setForm] = useState({
     courseCode: course?.courseCode || "", name: course?.name || "",
     description: course?.description || "", duration: course?.duration || "",
-    status: course?.status || "active",
+    status: course?.status || "active", category: course?.category || "",
+    level: course?.level || "beginner", price: course?.price || 0,
+    thumbnail: course?.thumbnail || "",
   });
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>(course?.thumbnail || "");
   const [isLoading, setIsLoading] = useState(false);
   const patch = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const handleSave = async () => {
-    if (!form.courseCode || !form.name || !form.description || !form.duration) {
-      showAlert({ message: "Please fill in all fields", variant: "info", title: "Missing Fields" });
+    if (!form.courseCode || !form.name || !form.description || !form.duration || !form.category || !form.thumbnail || form.price < 0) {
+      showAlert({ message: "Please fill in all required fields and upload a thumbnail", variant: "info", title: "Missing Fields" });
       return;
     }
     setIsLoading(true);
-    try { await onSave(form); onClose(); }
+    try { 
+      await onSave({
+        ...form,
+        price: typeof form.price === 'string' ? parseFloat(form.price) : form.price,
+      }); 
+      onClose(); 
+    }
     catch { showAlert({ message: "Error saving course", variant: "destructive", title: "Error" }); }
     finally { setIsLoading(false); }
   };
@@ -158,6 +208,33 @@ function CourseFormDialog({ open, onClose, course, onSave }: {
         </FormField>
         <FormField label="Description">
           <textarea name="description" value={form.description} onChange={patch} className={`${fieldCls} resize-none`} rows={3} placeholder="Course description" />
+        </FormField>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField label="Category">
+                      <select name="category" value={form.category} onChange={patch} className={fieldCls}>
+              <option value="Technology">Technology</option>
+              <option value="Music & Arts">Music & Arts</option>
+              <option value="Science">Science</option>
+              <option value="Programming">Programming</option>
+              <option value="Arts">Arts</option>
+            </select>
+          </FormField>
+          <FormField label="Level">
+            <select name="level" value={form.level} onChange={patch} className={fieldCls}>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </FormField>
+        </div>
+        <FormField label="Price ($)">
+          <input name="price" type="number" value={form.price} onChange={patch} className={fieldCls} placeholder="0.00" step="0.01" min="0" />
+        </FormField>
+        <FormField label="Thumbnail Image">
+          <ThumbnailUpload thumbnail={thumbnailPreview} name={form.name || "Course"} editable={true} onThumbnailChange={(v) => {
+            setForm((p) => ({ ...p, thumbnail: v }));
+            setThumbnailPreview(v);
+          }} />
         </FormField>
         <FormField label="Status">
           <select name="status" value={form.status} onChange={patch} className={fieldCls}>
@@ -341,13 +418,16 @@ function CourseCard({ course }: { course: Course }) {
         {/* Gold top line */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#c9a84c]/80 to-transparent" />
 
+        {/* ── Thumbnail Image ── */}
+        {course.thumbnail && (
+          <div className="w-full h-40 bg-gradient-to-br from-[#0d1535] to-[#132045] overflow-hidden border-b border-[#c9a84c]/[0.07]">
+            <img src={course.thumbnail} alt={course.name} className="w-full h-full object-cover" />
+          </div>
+        )}
+
         {/* ── Header: Code strip ── */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div className="flex items-center gap-2.5">
-            {/* Icon box */}
-            <div className="w-8 h-8 bg-gradient-to-br from-[#c9a84c]/20 to-[#c9a84c]/5 border border-[#c9a84c]/30 flex items-center justify-center shrink-0">
-              <BookOpen size={14} className="text-[#c9a84c]" />
-            </div>
             <div>
               <p className="font-[Lato] text-[0.55rem] tracking-[0.25em] uppercase text-[#c9a84c]/50 leading-none mb-0.5">Course Code</p>
               <p className="font-[Cinzel] text-sm font-bold text-[#c9a84c] tracking-wide leading-none">{course.courseCode}</p>
