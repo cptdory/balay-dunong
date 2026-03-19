@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import {
@@ -300,6 +301,7 @@ function DeleteConfirmDialog({ open, onClose, courseName, onConfirm }: {
 // ─── Course Card ──────────────────────────────────────────────────────────────
 
 function CourseCard({ course }: { course: Course }) {
+  const router = useRouter();
   const [studentsOpen, setStudentsOpen]           = useState(false);
   const [addInstructorOpen, setAddInstructorOpen] = useState(false);
   const [editOpen, setEditOpen]                   = useState(false);
@@ -411,25 +413,14 @@ function CourseCard({ course }: { course: Course }) {
           </button>
         </div>
 
-        {/* ── Primary CTA ── */}
-        <button onClick={() => setStudentsOpen(true)}
-          className="flex items-center justify-between px-5 py-3.5 border-b border-[#c9a84c]/[0.07] hover:bg-[#c9a84c]/[0.04] transition-colors group/cta">
-          <div className="flex items-center gap-2.5">
-            <Users size={14} className="text-[#c9a84c]/60 group-hover/cta:text-[#c9a84c] transition-colors" />
-            <span className="font-[Lato] text-[0.68rem] uppercase tracking-[0.15em] font-semibold text-[#c9a84c]/70 group-hover/cta:text-[#c9a84c] transition-colors">
-              Manage Students
-            </span>
-          </div>
-          <ChevronRight size={14} className="text-[#c9a84c]/30 group-hover/cta:text-[#c9a84c]/70 transition-colors" />
-        </button>
-
         {/* ── Secondary Actions ── */}
         <div className="flex mt-auto divide-x divide-[#c9a84c]/[0.07]">
           <button onClick={() => setEditOpen(true)}
             className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[#c9a84c]/40 hover:text-[#c9a84c] hover:bg-[#c9a84c]/[0.05] text-[0.58rem] uppercase tracking-widest font-[Lato] font-semibold transition-colors">
             <Edit2 size={11} /> Edit
           </button>
-          <button className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[#c9a84c]/40 hover:text-[#c9a84c] hover:bg-[#c9a84c]/[0.05] text-[0.58rem] uppercase tracking-widest font-[Lato] font-semibold transition-colors">
+          <button onClick={() => router.push(`/programs/${course._id}`)}
+            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[#c9a84c]/40 hover:text-[#c9a84c] hover:bg-[#c9a84c]/[0.05] text-[0.58rem] uppercase tracking-widest font-[Lato] font-semibold transition-colors">
             <Eye size={11} /> View
           </button>
           <button onClick={() => setDeleteOpen(true)}

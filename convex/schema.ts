@@ -32,7 +32,6 @@ export default defineSchema({
     .index("by_courseCode", ["courseCode"])
     .index("by_status", ["status"]),
 
-
   courseMembers: defineTable({
     courseId: v.id("courses"),
     userId: v.id("users"),
@@ -41,5 +40,32 @@ export default defineSchema({
     .index("by_course", ["courseId"])
     .index("by_user", ["userId"])
     .index("by_course_and_user", ["courseId", "userId"]),
+
+  courseSections: defineTable({
+    courseId: v.id("courses"),
+    title: v.string(), // e.g. "Lesson 1: Introduction"
+    description: v.optional(v.string()),
+    order: v.number(), // for ترتيب / sorting
+  })
+    .index("by_course", ["courseId"])
+    .index("by_course_and_order", ["courseId", "order"]),
+
+  courseContents: defineTable({
+    courseId: v.id("courses"),
+    sectionId: v.id("courseSections"),
+
+    title: v.string(),
+    type: v.string(),
+    // "pdf" | "doc" | "link" | "image"
+    contentUrl: v.optional(v.union(v.id("_storage"), v.string())),
+    // storageId for uploaded files or raw URL for link type
+    textContent: v.optional(v.string()),
+    // for descriptions or rich text
+
+    order: v.number(),
+  })
+    .index("by_section", ["sectionId"])
+    .index("by_course", ["courseId"])
+    .index("by_section_and_order", ["sectionId", "order"]),
 
 });

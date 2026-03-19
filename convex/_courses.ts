@@ -160,3 +160,156 @@ export const deleteCourse = mutation({
     return true;
   },
 });
+
+// ─── Section Management ────────────────────────────────────────────────────
+
+export const getCourseSections = query({
+  args: { courseId: v.id("courses") },
+  handler: async (ctx, args) => {
+    const sections = await ctx.db
+      .query("courseSections")
+      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
+      .collect();
+    
+    return sections.sort((a, b) => a.order - b.order);
+  },
+});
+
+export const createSection = mutation({
+  args: {
+    courseId: v.id("courses"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    order: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const sectionId = await ctx.db.insert("courseSections", args);
+    return sectionId;
+  },
+});
+
+export const updateSection = mutation({
+  args: {
+    sectionId: v.id("courseSections"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    order: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const { sectionId, ...updateData } = args;
+    await ctx.db.patch(sectionId, updateData);
+    return sectionId;
+  },
+});
+
+export const deleteSection = mutation({
+  args: { sectionId: v.id("courseSections") },
+  handler: async (ctx, args) => {
+    // Delete all contents in this section first
+    const contents = await ctx.db
+      .query("courseContents")
+      .withIndex("by_section", (q) => q.eq("sectionId", args.sectionId))
+      .collect();
+
+    await Promise.all(contents.map((content) => ctx.db.delete(content._id)));
+
+    // Then delete the section
+    await ctx.db.delete(args.sectionId);
+    return true;
+  },
+});
+
+// ─── Content Management ───────────────────────────────────────────────────
+
+export const getSectionContents = query({
+  args: { sectionId: v.id("courseSections") },
+  handler: async (ctx, args) => {
+    const contents = await ctx.db
+      .query("courseContents")
+      .withIndex("by_section", (q) => q.eq("sectionId", args.sectionId))
+      .collect();
+    
+    return contents.sort((a, b) => a.order - b.order);
+  },
+});
+
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const createContent = mutation({
+  args: {
+    courseId: v.id("courses"),
+    sectionId: v.id("courseSections"),
+    title: v.string(),
+    type: v.string(),
+    contentUrl: v.optional(v.union(v.id("_storage"), v.string())),
+    textContent: v.optional(v.string()),
+    order: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const contentId = await ctx.db.insert("courseContents", args);
+    return contentId;
+  },
+});
+
+export const updateContent = mutation({
+  args: {
+    contentId: v.id("courseContents"),
+    title: v.string(),
+    type: v.string(),
+    contentUrl: v.optional(v.union(v.id("_storage"), v.string())),
+    textContent: v.optional(v.string()),
+    order: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.get(args.contentId);
+    if (!existing) {
+      throw new Error("Content not found");
+    }
+
+    const wasFileType = ["pdf", "doc", "image"].includes(existing.type);
+    const oldContentUrl = existing.contentUrl;
+    const newContentUrl = args.contentUrl;
+    const contentUrlChanged = oldContentUrl !== newContentUrl;
+    const oldIsHttpUrl = !!oldContentUrl && /^https?:\/\//i.test(oldContentUrl);
+
+    if (wasFileType && oldContentUrl && contentUrlChanged && !oldIsHttpUrl) {
+      await ctx.storage.delete(oldContentUrl as any);
+    }
+
+    const { contentId, ...updateData } = args;
+    await ctx.db.patch(contentId, updateData);
+    return contentId;
+  },
+});
+
+export const deleteContent = mutation({
+  args: { contentId: v.id("courseContents") },
+  handler: async (ctx, args) => {
+    const content = await ctx.db.get(args.contentId);
+    if (!content) {
+      throw new Error("Content not found");
+    }
+
+    if (["pdf", "doc", "image"].includes(content.type) && content.contentUrl) {
+      const isHttpUrl = /^https?:\/\//i.test(content.contentUrl);
+      if (!isHttpUrl) {
+        await ctx.storage.delete(content.contentUrl as any);
+      }
+    }
+
+    await ctx.db.delete(args.contentId);
+    return true;
+  },
+});
+
+export const getFileUrl = query({
+  args: { storageId: v.id("_storage") },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.storageId);
+  },
+});

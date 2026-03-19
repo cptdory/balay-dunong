@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle, InfoIcon, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, InfoIcon, XCircle, XIcon } from "lucide-react";
 import {
   Alert,
   AlertDescription,
@@ -43,7 +43,7 @@ export function ErrorAlert({
           onClick={onClose}
           className="absolute right-4 top-4 text-sm underline"
         >
-          Dismiss
+          <XIcon className="h-3 w-3" />
         </button>
       )}
     </Alert>
