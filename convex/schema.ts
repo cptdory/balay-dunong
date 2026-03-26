@@ -14,6 +14,31 @@ export default defineSchema({
     status: v.string(), // active, inactive, pending
   }).index("by_email", ["email"]),
 
+  enrollee: defineTable({
+    // Student fields
+    studentFirstName: v.string(),
+    studentLastName: v.string(),
+    studentEmail: v.string(),
+    studentPhone: v.string(),
+    studentBirthday: v.string(),
+    studentAddress: v.string(),
+    studentCity: v.string(),
+    studentGradeLevel: v.string(),
+
+    // Guardian fields
+    guardianFirstName: v.string(),
+    guardianLastName: v.string(),
+    guardianRelationship: v.string(),
+    guardianEmail: v.string(),
+    guardianPhone: v.string(),
+    guardianOccupation: v.string(),
+    guardianAddress: v.string(),
+
+    enrollmentStatus: v.string(), // pending, enrolled, rejected
+    // Course selection
+    courseId: v.string(),
+  }),
+
   otps: defineTable({
     userId: v.id("users"),
     code: v.string(),

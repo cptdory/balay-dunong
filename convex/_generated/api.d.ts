@@ -9,6 +9,7 @@
  */
 
 import type * as _courses from "../_courses.js";
+import type * as _enrollee from "../_enrollee.js";
 import type * as _otp from "../_otp.js";
 import type * as _users from "../_users.js";
 
@@ -20,6 +21,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   _courses: typeof _courses;
+  _enrollee: typeof _enrollee;
   _otp: typeof _otp;
   _users: typeof _users;
 }>;

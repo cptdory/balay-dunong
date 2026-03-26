@@ -10,8 +10,7 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useAlert } from "../alert-context";
-
+import { sileo } from "sileo";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Course = {
@@ -111,9 +110,9 @@ function ThumbnailUpload({ thumbnail, name, editable = false, onThumbnailChange 
         {thumbnail
           ? <img src={thumbnail} alt={name} className="w-full h-full object-cover" />
           : <div className="flex flex-col items-center gap-2 text-[#c9a84c]/50">
-              <BookOpen size={24} />
-              <span className="font-[Lato] text-xs">No image yet</span>
-            </div>
+            <BookOpen size={24} />
+            <span className="font-[Lato] text-xs">No image yet</span>
+          </div>
         }
       </div>
       {editable && (
@@ -143,11 +142,10 @@ function DialogActions({ onClose, onConfirm, confirmLabel, isLoading, danger }: 
         Cancel
       </button>
       <button onClick={onConfirm} disabled={isLoading}
-        className={`px-4 py-1.5 text-xs font-[Lato] uppercase tracking-widest transition-colors disabled:opacity-50 border ${
-          danger
-            ? "bg-red-500/20 hover:bg-red-500/30 border-red-500/40 text-red-400"
-            : "bg-[#c9a84c]/20 hover:bg-[#c9a84c]/30 border-[#c9a84c]/40 text-[#c9a84c]"
-        }`}>
+        className={`px-4 py-1.5 text-xs font-[Lato] uppercase tracking-widest transition-colors disabled:opacity-50 border ${danger
+          ? "bg-red-500/20 hover:bg-red-500/30 border-red-500/40 text-red-400"
+          : "bg-[#c9a84c]/20 hover:bg-[#c9a84c]/30 border-[#c9a84c]/40 text-[#c9a84c]"
+          }`}>
         {isLoading ? "Saving…" : confirmLabel}
       </button>
     </div>
@@ -160,7 +158,6 @@ function CourseFormDialog({ open, onClose, course, onSave }: {
   open: boolean; onClose: () => void; course?: Course;
   onSave: (data: Omit<Course, "_id">) => Promise<void>;
 }) {
-  const { showAlert } = useAlert();
   const [form, setForm] = useState({
     courseCode: course?.courseCode || "", name: course?.name || "",
     description: course?.description || "", duration: course?.duration || "",
@@ -175,18 +172,20 @@ function CourseFormDialog({ open, onClose, course, onSave }: {
 
   const handleSave = async () => {
     if (!form.courseCode || !form.name || !form.description || !form.duration || !form.category || !form.thumbnail || form.price < 0) {
-      showAlert({ message: "Please fill in all required fields and upload a thumbnail", variant: "info", title: "Missing Fields" });
+      sileo.error({ title: "Missing required fields", fill: "#171717" });
       return;
     }
     setIsLoading(true);
-    try { 
+    try {
       await onSave({
         ...form,
         price: typeof form.price === 'string' ? parseFloat(form.price) : form.price,
-      }); 
-      onClose(); 
+      });
+      onClose();
     }
-    catch { showAlert({ message: "Error saving course", variant: "destructive", title: "Error" }); }
+    catch {
+      sileo.error({ title: "Error saving course", fill: "#171717" });
+    }
     finally { setIsLoading(false); }
   };
 
@@ -211,7 +210,7 @@ function CourseFormDialog({ open, onClose, course, onSave }: {
         </FormField>
         <div className="grid grid-cols-2 gap-4">
           <FormField label="Category">
-                      <select name="category" value={form.category} onChange={patch} className={fieldCls}>
+            <select name="category" value={form.category} onChange={patch} className={fieldCls}>
               <option value="Technology">Technology</option>
               <option value="Music & Arts">Music & Arts</option>
               <option value="Science">Science</option>
@@ -257,7 +256,6 @@ function AddMemberDialog({ open, onClose, courseId, role, allUsers, currentMembe
 }) {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { showAlert } = useAlert();
   const currentMemberIds = new Set(currentMembers?.map((m) => m.userId) || []);
   const availableUsers = useMemo(
     () => (allUsers || []).filter((u) => !currentMemberIds.has(u._id) && u.role === role),
@@ -267,7 +265,11 @@ function AddMemberDialog({ open, onClose, courseId, role, allUsers, currentMembe
     if (!selectedUserId) return;
     setIsLoading(true);
     try { await onAdd(selectedUserId, role); setSelectedUserId(""); onClose(); }
-    catch { showAlert({ message: `Error adding ${role}`, variant: "destructive", title: "Error" }); }
+    catch {
+      sileo.error({
+        title: `Error adding ${role}`, fill: "#171717",
+      });
+    }
     finally { setIsLoading(false); }
   };
   const label = role === "instructor" ? "Instructor" : "Student";
@@ -379,34 +381,35 @@ function DeleteConfirmDialog({ open, onClose, courseName, onConfirm }: {
 
 function CourseCard({ course }: { course: Course }) {
   const router = useRouter();
-  const [studentsOpen, setStudentsOpen]           = useState(false);
+  const [studentsOpen, setStudentsOpen] = useState(false);
   const [addInstructorOpen, setAddInstructorOpen] = useState(false);
-  const [editOpen, setEditOpen]                   = useState(false);
-  const [deleteOpen, setDeleteOpen]               = useState(false);
-  const { showAlert } = useAlert();
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const instructors = useQuery(api._courses.getCourseMembersByRole, { courseId: course._id as any, role: "instructor" });
-  const students    = useQuery(api._courses.getCourseMembersByRole, { courseId: course._id as any, role: "student" });
-  const allUsers    = useQuery(api._courses.getAllUsers);
+  const students = useQuery(api._courses.getCourseMembersByRole, { courseId: course._id as any, role: "student" });
+  const allUsers = useQuery(api._courses.getAllUsers);
 
-  const addCourseMember    = useMutation(api._courses.addCourseMember);
+  const addCourseMember = useMutation(api._courses.addCourseMember);
   const deleteCourseMember = useMutation(api._courses.deleteCourseMember);
-  const updateCourse       = useMutation(api._courses.updateCourse);
-  const deleteCourse       = useMutation(api._courses.deleteCourse);
+  const updateCourse = useMutation(api._courses.updateCourse);
+  const deleteCourse = useMutation(api._courses.deleteCourse);
 
   const instructorNames = useMemo(
-    () => instructors?.map((i: CourseMember) => i.user?.name || "Unknown").join(", ") || "Unassigned",
+    () => instructors?.map((i: CourseMember) => i.user?.name || "Unknown").join(", ") || "-",
     [instructors]
   );
 
   const isActive = course.status === "active";
 
-  const handleAddMember    = async (userId: string, role: string): Promise<void> => { await addCourseMember({ courseId: course._id as any, userId: userId as any, role }); };
+  const handleAddMember = async (userId: string, role: string): Promise<void> => { await addCourseMember({ courseId: course._id as any, userId: userId as any, role }); };
   const handleDeleteMember = async (memberId: string): Promise<void> => { await deleteCourseMember({ memberId: memberId as any }); };
-  const handleUpdate       = async (data: Omit<Course, "_id">): Promise<void> => { await updateCourse({ courseId: course._id as any, ...data }); };
-  const handleDelete       = async () => {
+  const handleUpdate = async (data: Omit<Course, "_id">): Promise<void> => { await updateCourse({ courseId: course._id as any, ...data }); };
+  const handleDelete = async () => {
     await deleteCourse({ courseId: course._id as any });
-    showAlert({ message: "Course deleted", variant: "success", title: "Deleted" });
+    sileo.error({
+      title: "Course deleted", fill: "#171717",
+    });
     setDeleteOpen(false);
   };
 
@@ -435,11 +438,10 @@ function CourseCard({ course }: { course: Course }) {
           </div>
 
           {/* Status pill */}
-          <span className={`text-[0.55rem] tracking-[0.15em] uppercase px-2.5 py-1 border font-bold font-[Lato] ${
-            isActive
-              ? "bg-green-400/[0.07] border-green-400/25 text-green-400"
-              : "bg-red-400/[0.07] border-red-400/25 text-red-400"
-          }`}>
+          <span className={`text-[0.55rem] tracking-[0.15em] uppercase px-2.5 py-1 border font-bold font-[Lato] ${isActive
+            ? "bg-green-400/[0.07] border-green-400/25 text-green-400"
+            : "bg-red-400/[0.07] border-red-400/25 text-red-400"
+            }`}>
             {isActive ? "● Active" : "○ Inactive"}
           </span>
         </div>
@@ -531,12 +533,14 @@ export default function ProgramsPage() {
   const courses = useQuery(api._courses.getAllCourses);
   const coursesData = useMemo<Course[]>(() => courses ?? [], [courses]);
   const [createOpen, setCreateOpen] = useState(false);
-  const { showAlert } = useAlert();
   const createCourse = useMutation(api._courses.createCourse);
 
   const handleCreate = async (data: Omit<Course, "_id">) => {
     await createCourse(data);
-    showAlert({ message: "Course created successfully", variant: "success", title: "Success" });
+    sileo.success({
+      title: "Course created successfully",
+      fill: "#171717",
+    });
     setCreateOpen(false);
   };
 

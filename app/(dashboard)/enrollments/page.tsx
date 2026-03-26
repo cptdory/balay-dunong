@@ -1,5 +1,12 @@
-import { DashboardPlaceholder } from "../_components/dashboard-placeholder";
+"use client";
+import { sileo } from "sileo";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function EnrollmentsPage() {
-  return <DashboardPlaceholder icon="E" label="Enrollments" />;
+  <>
+    <div className="min-h-[480px] p-6">
+
+    </div>
+  </>
 }

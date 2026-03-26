@@ -1,5 +1,9 @@
+import { Toaster } from "sileo";
+
 export default function PublicLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return <>{children}</>;
+  return <>
+  <Toaster position="bottom-right" theme="dark" />
+  {children}</>;
 }

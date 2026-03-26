@@ -10,7 +10,7 @@ import {
   Camera, Pencil, X, Save, Loader2,
   GraduationCap, Search,
 } from "lucide-react";
-import { useAlert } from "../alert-context";
+import { sileo } from "sileo";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -63,15 +63,15 @@ function getInitials(name: string) {
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
 const statusStyles: Record<StudentStatus, string> = {
-  active:   "bg-green-400/[0.07] border-green-400/25 text-green-400",
+  active: "bg-green-400/[0.07] border-green-400/25 text-green-400",
   inactive: "bg-red-400/[0.07] border-red-400/25 text-red-400",
-  pending:  "bg-[#c9a84c]/[0.07] border-[#c9a84c]/25 text-[#c9a84c]",
+  pending: "bg-[#c9a84c]/[0.07] border-[#c9a84c]/25 text-[#c9a84c]",
 };
 
 const dotStyles: Record<StudentStatus, string> = {
-  active:   "bg-green-400",
+  active: "bg-green-400",
   inactive: "bg-red-400",
-  pending:  "bg-[#c9a84c]",
+  pending: "bg-[#c9a84c]",
 };
 
 function StatusBadge({ status }: { status: StudentStatus }) {
@@ -131,7 +131,6 @@ function Avatar({ avatar, name, editable = false, onAvatarChange }: {
 
 function StudentDialog({ student, onClose }: { student: Student; onClose: () => void }) {
   const updateStudentMutation = useMutation(api._users.updateUsers);
-  const { showAlert } = useAlert();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<Student>(student);
   const [isSaving, setIsSaving] = useState(false);
@@ -147,10 +146,16 @@ function StudentDialog({ student, onClose }: { student: Student; onClose: () => 
         birthday: form.birthday, address: form.address,
         phone: form.phone, avatar: form.avatar, status: form.status,
       });
-      showAlert({ message: "Student profile updated successfully", variant: "success", title: "Success" });
+      sileo.success({
+        title: "Student profile updated successfully",
+        fill: "#171717"
+      });
       setIsEditing(false);
     } catch {
-      showAlert({ message: "Error updating student profile", variant: "destructive", title: "Error" });
+      sileo.error({
+        title: "Error updating student profile",
+        fill: "#171717"
+      });
     } finally {
       setIsSaving(false);
     }

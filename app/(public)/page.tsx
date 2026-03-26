@@ -50,24 +50,6 @@ export default function Page() {
 
                 {/* HERO */}
                 <section className="relative min-h-screen flex items-center overflow-hidden px-4 md:px-8">
-                    {/* Star background */}
-                    <div className="star-bg">
-                        {[...Array(60)].map((_, i) => (
-                            <div
-                                key={i}
-                                className="star"
-                                style={{
-                                    left: `${Math.random() * 100}%`,
-                                    top: `${Math.random() * 100}%`,
-                                    animationDelay: `${Math.random() * 3}s`,
-                                    animationDuration: `${2 + Math.random() * 3}s`,
-                                    opacity: Math.random() * 0.6 + 0.1,
-                                    width: Math.random() > 0.8 ? '3px' : '2px',
-                                    height: Math.random() > 0.8 ? '3px' : '2px',
-                                }}
-                            />
-                        ))}
-                    </div>
 
                     {/* Geometric accents */}
                     <div

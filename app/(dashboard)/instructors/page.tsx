@@ -10,7 +10,7 @@ import {
   Camera, Pencil, X, Save, Loader2,
   GraduationCap, Search,
 } from "lucide-react";
-import { useAlert } from "../alert-context";
+import { sileo } from "sileo";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -131,7 +131,6 @@ function Avatar({ avatar, name, editable = false, onAvatarChange }: {
 
 function InstructorDialog({ Instructor, onClose }: { Instructor: Instructor; onClose: () => void }) {
   const updateInstructorMutation = useMutation(api._users.updateUsers);
-  const { showAlert } = useAlert();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<Instructor>(Instructor);
   const [isSaving, setIsSaving] = useState(false);
@@ -147,10 +146,10 @@ function InstructorDialog({ Instructor, onClose }: { Instructor: Instructor; onC
         birthday: form.birthday, address: form.address,
         phone: form.phone, avatar: form.avatar, status: form.status,
       });
-      showAlert({ message: "Instructor profile updated successfully", variant: "success", title: "Success" });
+      sileo.success({ title: "Instructor profile updated successfully", fill: "#171717"});
       setIsEditing(false);
     } catch {
-      showAlert({ message: "Error updating Instructor profile", variant: "destructive", title: "Error" });
+      sileo.error({ title: "Error updating Instructor profile", fill: "#171717"});
     } finally {
       setIsSaving(false);
     }
@@ -321,10 +320,6 @@ export default function InstructorsPage() {
     {
       accessorKey: "status", header: "Status",
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
-    },
-    {
-      accessorKey: "enrollmentDate", header: "Enrolled",
-      cell: ({ row }) => <span className="font-[Lato] text-sm text-gray-400">{row.original.enrollmentDate}</span>,
     },
     {
       id: "actions", header: "",

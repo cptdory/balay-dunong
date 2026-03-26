@@ -7,7 +7,7 @@ import Footer from '@/components/Footer';
 import { useState } from 'react';
 import { api } from '@/convex/_generated/api';
 import { useMutation, useAction } from 'convex/react';
-import { ErrorAlert } from "@/components/error-alert";
+import { sileo } from 'sileo';
 
 export default function Login() {
   const [step, setStep] = useState<"email" | "otp">("email");
@@ -16,11 +16,7 @@ export default function Login() {
   const [otpId, setOtpId] = useState<string>("");
   const [otpCode, setOtpCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState<{
-    message: string;
-    variant: "default" | "destructive" | "success" | "info";
-    title: string;
-  } | null>(null);
+
   
   const getUser = useMutation(api._users.getUser);
   const createOTP = useMutation(api._otp.create);
@@ -31,24 +27,18 @@ export default function Login() {
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
-    setAlert(null);
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setAlert(null);
 
     try {
       // Check if user exists
       const response = await getUser({ email });
       
       if (response.status === "error") {
-        setAlert({
-          title: "Error",
-          message: response.message || "User not found",
-          variant: "destructive",
-        });
+         sileo.error({ title: response.message || "User not found" ,fill: "#171717", });
         setLoading(false);
         return;
       }
@@ -65,13 +55,8 @@ export default function Login() {
 
       // Move to OTP verification step
       setStep("otp");
-      setAlert(null);
     } catch (error) {
-      setAlert({
-        title: "Error",
-        message: error instanceof Error ? error.message : String(error),
-        variant: "destructive",
-      });
+      sileo.error({ title: error instanceof Error ? error.message : String(error) ,fill: "#171717", });
     } finally {
       setLoading(false);
     }
@@ -79,31 +64,21 @@ export default function Login() {
 
   const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOtpCode(e.target.value);
-    setAlert(null);
   };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setAlert(null);
 
     try {
       // Verify OTP
       const result = await verifyOTP({ otpId: otpId as any, code: otpCode });
 
       if (result.success) {
-        setAlert({
-          title: "Success",
-          message: "Login successful! User ID: " + result.userId,
-          variant: "success",
-        });
+        sileo.success({ title: "Login successful!", fill: "#171717", });
       }
     } catch (error) {
-      setAlert({
-        title: "Error",
-        message: error instanceof Error ? error.message : "Invalid OTP",
-        variant: "destructive",
-      });
+      sileo.error({ title: "Invalid OTP",fill: "#171717", });
     } finally {
       setLoading(false);
     }
@@ -113,46 +88,6 @@ export default function Login() {
         <>
             <div className="min-h-screen bg-casa-gradient text-white">
                 <Header />
-                {alert && (
-                  <div className="fixed bottom-4 right-4 w-96 z-50">
-                    <ErrorAlert
-                      title={alert.title}
-                      message={alert.message}
-                      variant={alert.variant}
-                      onClose={() => setAlert(null)}
-                    />
-                  </div>
-                )}
-                {/* Starfield Background */}
-                <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        pointerEvents: 'none',
-                        zIndex: 0,
-                        opacity: 0.15,
-                    }}
-                >
-                    {[...Array(50)].map((_, i) => (
-                        <div
-                            key={i}
-                            style={{
-                                position: 'absolute',
-                                width: Math.random() * 3 + 1 + 'px',
-                                height: Math.random() * 3 + 1 + 'px',
-                                background: '#c9a84c',
-                                borderRadius: '50%',
-                                left: Math.random() * 100 + '%',
-                                top: Math.random() * 100 + '%',
-                                animation: `twinkle ${Math.random() * 3 + 2}s infinite`,
-                            }}
-                        />
-                    ))}
-                </div>
-
                 <div className="relative z-10 pb-16 md:pb-20 px-4 md:px-8">
                     {/* Hero Section */}
                     <section className="max-w-7xl mx-auto pt-16 md:pt-32 pb-8 md:pb-20">
